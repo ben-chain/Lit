@@ -1,0 +1,97 @@
+
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>esp8266 ws2812 i2s controller</title>
+ <script language="javascript" type="text/javascript" src="./javascripts/jquery-2.1.4.min.js.gz"></script>
+<script language="javascript" type="text/javascript" src="./javascripts/menuinterface.js"></script>
+<script language="javascript" type="text/javascript" src="./javascripts/main.js"></script> 
+
+<style>
+table { width: 100%; }
+td { vertical-align: top; }
+.collapsible { display:none; }
+.inbutton { background-color:blue; }
+#SystemMessage { position: fixed; top: 5px; background-color: DarkSlateBlue; color: #ffffff; left: 5px; display:none; }
+.dragandrophandler { border:2px dotted #0B85A1; color:#92AAB0;vertical-align:middle;padding:10px 10px 10 10px;margin-bottom:10px;font-size:200%;}
+.unsaved-input { border: 2px solid pink; border-radius: 7px; }
+</style>
+
+<link rel="stylesheet" type="text/css" href="./stylesheets/scrubber.css">
+
+</head><body>
+
+<iframe id="minipaint" style="width:100%;height:90%;" src="./minipaint/index.html"></iframe>	
+
+
+<button id = "spotifyAuth" >Auth Spotify</button>
+<button id = "spotifyPause" >Pause Spotify</button>
+<button id = "spotifyPlay" >Play Spotify</button>
+
+
+
+<p>Broadcast FPS: </p><input type="number" id="broadcastFPS" value=30></input>
+<button onclick="startBroadcasting()">Start Broadcasting</button> 
+<button onclick="stopBroadcasting()">Stop Broadcasting</button>
+
+<p>Number of LEDs: </p><input type="number" id="numLEDs" value=300></input>
+
+
+<div style="height:20vh;margin:10px;">
+	Click on image to edit.
+	<br /><br />
+	<button onclick="my_update()">Update</button>
+	<button onclick="my_save()">Save</button>
+	<br /><br />
+	
+	<img style="max-height:100%" id="testImage" alt="" src="../images/logo.png" onclick="open_image(this)"  />
+</div>
+
+<script src="./javascripts/player.js"></script>
+<script src="./javascripts/keys.js"></script>
+<script src="./javascripts/instruments.js"></script>
+<script src="./javascripts/spotify-web-api/spotify-web-api.js"></script>
+<script src="./javascripts/spotifyplayer.js"></script>
+
+
+
+
+
+<h2>esp8266 ws2812 i2s controller</h2><hr>
+<table id="MainMenu">		<tr><td> 		<div id="SystemStatus" class="collapsible"> 		<table width="100%" border="1"><tbody><tr><td> <div id="output"><p>Messages: 806</p><p>RSSI: -70 / IP: 10.0.0.161</p></div><div id="systemsettings"><table style="width:150"><tbody><tr><td>System Name:</td><td><input type="TEXT" id="SystemName" maxlength="10"></td><td><input type="SUBMIT" value="Change" onclick="QueueOperation(&quot;IN&quot; + document.getElementById(&quot;SystemName&quot;).value ); snchanged = false;"></td></tr>		<tr><td nowrap="">System Description:</td><td><input type="TEXT" id="SystemDescription" maxlength="16"></td><td><input type="SUBMIT" value="Change" onclick="QueueOperation(&quot;ID&quot; + document.getElementById(&quot;SystemDescription&quot;).value ); sdchanged = false;"></td></tr><tr><td>Service Name:</td><td><div id="ServiceName"></div></td></tr><tr><td>Free Heap:</td><td><div id="FreeHeap"></div></td></tr></tbody></table>		<input type="SUBMIT" value="Reset To Current" onclick="SystemChangesReset();">		<input type="SUBMIT" value="Save" onclick="if( SystemUncommittedChanges() ) { IssueSystemMessage( &quot;Cannot save.  Uncommitted changes.&quot;); return; } QueueOperation(&quot;IS&quot;, function() { IssueSystemMessage( &quot;Saving&quot; ); } ); SystemChangesReset(); ">		<input type="SUBMIT" value="Revert From Saved" onclick="QueueOperation(&quot;IL&quot;, function() { IssueSystemMessage( &quot;Reverting.&quot; ); } ); SystemChangesReset();">		<input type="SUBMIT" value="Revert To Factory" onclick="if( confirm( &quot;Are you sure you want to revert to factory settings?&quot; ) ) QueueOperation(&quot;IR&quot;); SystemChangesReset();">		<input type="SUBMIT" value="Reboot" onclick="QueueOperation(&quot;IB&quot;);">		<p>Search for others:</p>		<div id="peers"></div></div> 
+		</td></tr></tbody></table></div></td></tr><tbody>
+
+<tr><td width="1">
+<input type="submit" onclick="ShowHideEvent( &#39;Introduction&#39; );" value="Introduction"></td><td>
+<div id="Introduction" class="collapsible"><table border="1"><tbody><tr><td><p></p><p>Welcome to the esp8266ws2812i2s Web-based GUI.</p><p>This GUI uses WebSockets, and has only been tested under the newest (as of April, 2016) Chrome and Firefox browsers.</p><p>For more information about this project, visit it on github, here: <a href="https://github.com/cnlohr/esp8266ws2812i2s">https://github.com/cnlohr/esp8266ws2812i2s</a></p><p>If you want to send light to this device, send a UDP packet to port 7777 to it.  The first 3 bytes will be ignored, after that will be GRB values, one byte each, for each WS2812 you want to control</p><p></p></td></tr></tbody></table>
+</div></td></tr>
+
+</tbody>
+	<tr><td width="1"><input type="submit" onclick="ShowHideEvent( &#39;LEDs&#39; ); KickLEDs();" value="LEDs"></td><td>
+	<div id="LEDs" class="collapsible">
+	<table width="100%" border="1"><tbody><tr><td id="LEDCanvasHolder"><canvas id="LEDCanvas" width="512" height="100"></canvas></td>
+	<td><input type="button" onclick="ToggleLEDPause();" id="LEDPauseButton" value="|| / &gt;" style="background-color: red;"></td></tr></tbody></table>
+	Select LEDs/Pattern: <input type="text" id="LEDSelect" value="1-4">  <br>
+	#LEDs: <input type="number" min="0" value="4" id="LEDNum" style="width:5.5em;">
+	<input type="color" id="LEDColor"> <input type="button" value="Set Color" id="LEDCbtn"> <input type="button" value="Set Pattern" id="LEDPbtn"> <input type="button" value="Stop" id="LEDSbtn"> <input type="button" value="Off" id="LEDObtn">
+	<p style="font-size:70%;font-style: italic">
+	Patterns can include individual LEDs or ranges of LEDs separated by commata, e.g. "1-3,7,20-35".
+	You can select colors via the color-picker or by holding <kbd>Alt</kbd> and clicking a color inside the color display.
+	Alternatively, colors can be appended to a range, e.g. "1-3#ffff00". Rages without an appended color use the last specified one.
+	Ranges can be entered by hand or selected in the color-display with the usual <kbd>Shift</kbd>+<kbd>LeftClick</kbd> and <kbd>Alt</kbd>+<kbd>LeftClick</kbd> combinations.
+	If you set a pattern, use a low positive integer.
+	"#LEDs" is the total number of LEDs connected to the esp8266 and must be provided.</p>
+	</div>
+	</td></tr>
+		<tr><td width="1"> 		<input type="submit" onclick="ShowHideEvent( &#39;WifiSettings&#39; ); KickWifiTicker();" value="Wifi Settings"></td><td> 		<div id="WifiSettings" class="collapsible"> 		<table width="100%" border="1"><tbody><tr><td> 		Current Configuration: (May deviate from default configuration, reset here if in doubt)<form name="wifisection" action="javascript:ChangeWifiConfig();"> 		<table border="1" width="1%"> 		<tbody><tr><td width="1">Type:</td><td><input type="radio" name="wifitype" value="1" onclick="ClickOpmode(1);">Station (Connect to infrastructure)<br><input type="radio" name="wifitype" value="2" onclick="ClickOpmode(2);">AP (Broadcast a new AP)</td></tr> 		<tr><td>SSID:</td><td><input type="text" id="wificurname"></td></tr> 		<tr><td>PASS:</td><td><input type="text" id="wificurpassword"></td></tr> 		<tr><td>MAC:</td><td><input type="text" id="wifimac"> (Ignored in softAP mode)</td></tr> 		<tr><td>Chan:</td><td><input type="text" id="wificurchannel"> (Ignored in Station mode)</td></tr> 		<tr><td></td><td><input type="submit" value="Change Settings"> (Automatically saves to flash)</td></tr> 		</tbody></table></form> 		Scanned Stations: 		<div id="WifiStations"></div> 		<input type="submit" onclick="ScanForWifi();" value="Scan For Stations (Will disconnect!)"> 		</td></tr></tbody></table></div></td></tr> 		 		<tr><td width="1"> 		<input type="submit" onclick="ShowHideEvent( &#39;CustomCommand&#39; );" value="Custom Command"></td><td> 		<div id="CustomCommand" class="collapsible"> 		<table width="100%" border="1"><tbody><tr><td> 		Command: <input type="text" id="custom_command"> 		<input type="submit" value="Submit" onclick="IssueCustomCommand()"><br> 		<textarea id="custom_command_response" readonly="" rows="15" cols="80"></textarea> 		</td></tr></tbody></table></div></td></tr> 		 		<tr><td width="1"> 		<input type="submit" onclick="ShowHideEvent( &#39;GPIOs&#39; ); GPIODataTicker();" value="GPIOs"></td><td> 		<div id="GPIOs" class="collapsible"> 		<table width="100%" border="1"><tbody><tr><td align="center">0<input type="button" id="ButtonGPIO0" value="0" onclick="TwiddleGPIO(0);"><input type="button" id="BGPIOIn0" value="In" onclick="GPIOInput(0);" class="inbutton"></td><td align="center">1<input type="button" id="ButtonGPIO1" value="0" onclick="TwiddleGPIO(1);"><input type="button" id="BGPIOIn1" value="In" onclick="GPIOInput(1);" class="inbutton"></td><td align="center">2<input type="button" id="ButtonGPIO2" value="0" onclick="TwiddleGPIO(2);"><input type="button" id="BGPIOIn2" value="In" onclick="GPIOInput(2);" class="inbutton"></td><td align="center">3<input type="button" id="ButtonGPIO3" value="0" onclick="TwiddleGPIO(3);"><input type="button" id="BGPIOIn3" value="In" onclick="GPIOInput(3);" class="inbutton"></td><td align="center">4<input type="button" id="ButtonGPIO4" value="0" onclick="TwiddleGPIO(4);"><input type="button" id="BGPIOIn4" value="In" onclick="GPIOInput(4);" class="inbutton"></td><td align="center">5<input type="button" id="ButtonGPIO5" value="0" onclick="TwiddleGPIO(5);"><input type="button" id="BGPIOIn5" value="In" onclick="GPIOInput(5);" class="inbutton"></td><td align="center">6<input type="button" id="ButtonGPIO6" value="0" onclick="TwiddleGPIO(6);"><input type="button" id="BGPIOIn6" value="In" onclick="GPIOInput(6);" class="inbutton"></td><td align="center">7<input type="button" id="ButtonGPIO7" value="0" onclick="TwiddleGPIO(7);"><input type="button" id="BGPIOIn7" value="In" onclick="GPIOInput(7);" class="inbutton"></td><td align="center">8<input type="button" id="ButtonGPIO8" value="0" onclick="TwiddleGPIO(8);"><input type="button" id="BGPIOIn8" value="In" onclick="GPIOInput(8);" class="inbutton"></td><td align="center">9<input type="button" id="ButtonGPIO9" value="0" onclick="TwiddleGPIO(9);"><input type="button" id="BGPIOIn9" value="In" onclick="GPIOInput(9);" class="inbutton"></td><td align="center">10<input type="button" id="ButtonGPIO10" value="0" onclick="TwiddleGPIO(10);"><input type="button" id="BGPIOIn10" value="In" onclick="GPIOInput(10);" class="inbutton"></td><td align="center">11<input type="button" id="ButtonGPIO11" value="0" onclick="TwiddleGPIO(11);"><input type="button" id="BGPIOIn11" value="In" onclick="GPIOInput(11);" class="inbutton"></td><td align="center">12<input type="button" id="ButtonGPIO12" value="0" onclick="TwiddleGPIO(12);"><input type="button" id="BGPIOIn12" value="In" onclick="GPIOInput(12);" class="inbutton"></td><td align="center">13<input type="button" id="ButtonGPIO13" value="0" onclick="TwiddleGPIO(13);"><input type="button" id="BGPIOIn13" value="In" onclick="GPIOInput(13);" class="inbutton"></td><td align="center">14<input type="button" id="ButtonGPIO14" value="0" onclick="TwiddleGPIO(14);"><input type="button" id="BGPIOIn14" value="In" onclick="GPIOInput(14);" class="inbutton"></td><td align="center">15<input type="button" id="ButtonGPIO15" value="0" onclick="TwiddleGPIO(15);"><input type="button" id="BGPIOIn15" value="In" onclick="GPIOInput(15);" class="inbutton"></td></tr></tbody></table></div></td></tr>		<tr><td width="1">		<input type="submit" onclick="ShowHideEvent( &#39;SystemReflash&#39; );" value="System Reflash"></td><td>		<div id="SystemReflash" class="collapsible">		<div id="InnerSystemReflash" class="dragandrophandler">		<input id="dragndropersystem" type="file" multiple=""> <div id="innersystemflashtext">Drop or browse for system (0x000.. 0x400...) or web (.mpfs) reflash files.</div>		</div></div></td></tr></table>
+
+
+<font size="-2">
+<p>Copyright (C) 2015-2016 &lt;&gt;&lt; Charles Lohr, See LICENSE file for more info.</p>
+<p><a href="https://github.com/cnlohr/esp8266ws2812i2s"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAEBSURBVCgVBcHdSpMBAAbgZ4M+rXuQIkRlMJnHHS22LJh4F57uRpShorsAb8DORkaLEDzVgUoQHrh+xBMhEH8+5uvzAFDX99OjW6f66gDAlF0TQ10dHV1DEzumAApDvzUBQNMfXxVA39iMVwBg2mtjfSrqjrVcGdlz6K2KCw1r3ntpoMGm71gSERER0cQPvapln9EGANDGvhYPVjASERERcYlV/6siKAAAFIinqgtzGAEAOMGcMRuO0HArIiLiwTscWaem9BHztpyL+GXXIj4pLcC2a7PgUMQpeOOvLaBw4MoH3IgIWv4ZKACmbSt9cy8ivij1vAAAajacuXPnzLoawDOHTGouVu63twAAAABJRU5ErkJggg==" style="height: 1em;" alt="github-logo">
+esp8266ws2812i2s
+</a> "Version: v0.5-28-g657c4-dev - Build Sat, Dec  9 2017, 20:31:16 -0500 with -DICACHE_FLASH -DSK6812 -DWEB_PORT=80 -DCOM_PORT=7777 -DBACKEND_PORT=7878  -DSLOWTICK_MS=50"</p>
+</font>
+<div id="SystemMessage" style="display: none;"><font size="+2">Comms Established.</font></div>
+
+
+</body></html>

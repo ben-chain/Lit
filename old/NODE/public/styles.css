@@ -1,0 +1,27 @@
+audio { width: 1500px; }
+
+
+body {
+    background-color: yellow;
+} 
+
+#canvasWrapper {
+    position: absolute;
+    top: 400px;
+    height: 2500px;
+    overflow: hidden;
+}
+
+#canvasGrabber {
+    float:right;
+}
+
+#padDiv {
+    position: relative;
+    top: 100px;
+}
+
+#padDiv img{
+    height: 100px;
+    width: 140px;
+}

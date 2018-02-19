@@ -1,0 +1,57 @@
+<html>
+    <meta name="viewport" content="user-scalable=no">
+dd
+    <script src="http://10.0.0.26:8080/target/target-script-min.js#anonymous"></script>
+    <script src="canvas.js"></script>
+    <script src="trackStack.js"></script>
+    <script src="compassDrawer.js"></script>
+    <script src="lights.js"></script>
+    <script src="playrec.js"></script>
+    <script src="fpsmeter.js"></script>
+    <script src="tinycolorpicker.js"></script>
+    <script src="pad.js"></script>
+    <script src="init.js"></script>
+
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tinycolorpicker.css">
+    <head>
+    </head>
+
+    <body onload="init();">
+        <div id="canvasWrapper">
+        <canvas id="viewCanvas" height="500"></canvas>
+        <img id="canvasGrabber" src="scrollbar.png"></img>
+        </div>
+        <audio id="theAudio" controls>
+            <source src="carol.mp3" type="audio/mpeg">
+        </audio>
+        <button onclick="playRec()">Play Recording</button>
+        <button onclick="pauseRec()">Pause Recording</button>
+        <button onclick="compassDrawOn()">Compass Draw On</button>
+        <button onclick="compassDrawOff()">Compass Draw Off</button>
+        <img src="images/time.png" onclick="startDrops" id="timeDropper">Drop Time</img>
+        <button onclick="saveTrack()">Save track</button>
+
+        <div id="colorPicker">
+            <a class="color"><div class="colorInner"></div></a>
+            <div class="track"></div>
+            <ul class="dropdown"><li></li></ul>
+            <input type="hidden" class="colorInput"/>
+        </div>
+
+        <div id="padDiv">
+            <img src="images/carol/twinkle.png"></img>
+            <img src="images/carol/purplebar.png "></img>
+            </br>
+            <img src="images/carol/purplebars/1.png "></img>
+            <img src="images/carol/purplebars/2.png "></img>
+            <img src="images/carol/purplebars/3.png "></img>
+            <img src="images/carol/purplebars/4.png "></img>
+        </div>
+
+    <img src="images/carol/carol.png" id="track" hidden></img>
+
+    </body>
+
+</html>
