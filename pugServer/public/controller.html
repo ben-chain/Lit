@@ -3,8 +3,8 @@
 
 <title>esp8266 ws2812 i2s controller</title>
  <script language="javascript" type="text/javascript" src="./javascripts/jquery-2.1.4.min.js.gz"></script>
-<script language="javascript" type="text/javascript" src="./javascripts/menuinterface.js"></script>
-<script language="javascript" type="text/javascript" src="./javascripts/main.js"></script> 
+<!--<script language="javascript" type="text/javascript" src="./javascripts/menuinterface.js"></script>
+<script language="javascript" type="text/javascript" src="./javascripts/main.js"></script> !-->
 
 <style>
 table { width: 100%; }
@@ -16,13 +16,29 @@ td { vertical-align: top; }
 .unsaved-input { border: 2px solid pink; border-radius: 7px; }
 </style>
 
-<link rel="stylesheet" type="text/css" href="./stylesheets/scrubber.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/scrubber.css">
 
 </head><body>
 
+<link rel="stylesheet" href="./stylesheets/dropzone.css">
+<script src="./javascripts/dropzone.js"></script>
+<button id="submit-all">Submit all files</button>
+<form action="/target" class="dropzone" id="my-dropzone"></form>
+
+
+
 <iframe id="minipaint" style="width:100%;height:90%;" src="./minipaint/index.html"></iframe>	
 
+<form id="playbackSelect">
+  <input type="radio" name="playbackType" value="file" id="isFilePlayback" checked>File Playback:
+  <input type="text" id="audioFilename" value="butterfliess.mp3"><br>
+  <input type="radio" name="playbackType" value="spotify">Spotify Playback<br>           
+</form>
 
+<audio id = "theAudio" controls>
+  <source id="audioSource" src="" type="audio/mp4">
+</audio>
+<br>
 <button id = "spotifyAuth" >Auth Spotify</button>
 <button id = "spotifyPause" >Pause Spotify</button>
 <button id = "spotifyPlay" >Play Spotify</button>

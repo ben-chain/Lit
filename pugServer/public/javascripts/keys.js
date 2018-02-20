@@ -3,77 +3,37 @@ numLEDs = document.getElementById('numLEDs').value;
 noteImage = document.createElement('img');
 noteImage.src = './images/noteIm.png';
 
-var isNotePressed = [];
+var isKeyPressed = [];
+var asciiKeyToKeyboard = [];
+
+asciiKeyToKeyboard[65] = 0; //a
+asciiKeyToKeyboard[83] = 1; //s
+asciiKeyToKeyboard[68] = 2; //d
+asciiKeyToKeyboard[70] = 3; //...
+asciiKeyToKeyboard[71] = 4;
+asciiKeyToKeyboard[72] = 5;
+asciiKeyToKeyboard[74] = 6;
+asciiKeyToKeyboard[75] = 7;
+asciiKeyToKeyboard[76] = 8; //l
+
 $(document).keydown(function(e){
-    var number;
-    switch(e.which) {
-        case 65: //a
-            number=0;
-            break;
-        case 83: //s
-            number=1;
-            break;
-        case 68: //d
-            number=2;
-            break;
-        case 70: //f
-            number=3;
-            break;
-        case 71: //g
-            number=4;
-            break;
-        case 72: //h
-            number=5;
-            break;
-        case 74: //j
-            number=6;
-            break;
-        case 75: //k
-            number=7;
-            break;
-        case 76: //l
-            number=8;
-            break;
-        }
-    if (!isNotePressed[number]){
-        noteStart(number);
-        isNotePressed[number] = true;
+    var number = e.which;
+    if (!isKeyPressed[number]){
+        isKeyPressed[number] = true;
+		if (asciiKeyToKeyboard[number] != null) {
+			noteStart(asciiKeyToKeyboard[number]);
+		} else {
+			padPress(number);
+		}
     }
 });
 $(document).keyup(function(e){
-    var number;
-    switch(e.which) {
-        case 65: //a
-            number=0;
-            break;
-        case 83: //s
-            number=1;
-            break;
-        case 68: //d
-            number=2;
-            break;
-        case 70: //f
-            number=3;
-            break;
-        case 71: //g
-            number=4;
-            break;
-        case 72: //h
-            number=5;
-            break;
-        case 74: //j
-            number=6;
-            break;
-        case 75: //k
-            number=7;
-            break;
-        case 76: //l
-            number=8;
-            break;
-        }
-    if (isNotePressed[number]){
-        noteEnd(number);
-        isNotePressed[number] = false;
+    var number = e.which;
+	if (isKeyPressed[number]){
+        isKeyPressed[number] = false;
+		if (asciiKeyToKeyboard[number] != null) {
+			noteEnd(asciiKeyToKeyboard[number]);
+		}
     }
 });
 

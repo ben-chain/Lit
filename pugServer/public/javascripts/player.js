@@ -52,20 +52,43 @@ spotifyPaused = function(api){
 	},slightDelay);	
 }
 
-//var wsUri = "ws://" + '192.168.0.120' + "/d/ws/issue"; //before; location.host
-//var websocket;
+var wsUri = "ws://" + 'localhost:8080';  //'10.0.0.161' + "/d/ws/issue"; //before; location.host
+var websocket;
 
+function openWebsocket(){
+	websocket = new WebSocket(wsUri);//'ws://localhost:8080');//wsUri);
+	websocket.binaryType = 'arraybuffer';
+	websocket.onopen = function(evt) { console.log(evt) };
+	websocket.onclose = function(evt) { 
+		console.log(evt);
+		console.log('websocket closed, attempting to reopen');
+		websocket = openWebsocket();
+		console.log(websocket);
+	};
+	websocket.onmessage = function(evt) { };//console.log(evt) };
+	websocket.onerror = function(evt) { 
+		console.log('websocket error');
+		console.log(evt) 
+	};
+	return websocket;
+}
 
 startBroadcasting = function(){
 	var fps = document.getElementById('broadcastFPS').value;
-
-	/*websocket = new WebSocket(wsUri);
-	websocket.binaryType = 'arraybuffer';
-	websocket.onopen = function(evt) { console.log(evt) };
-	websocket.onclose = function(evt) { console.log(evt) };
-	websocket.onmessage = function(evt) { console.log(evt) };
-	websocket.onerror = function(evt) { console.log(evt) };
-	*/
+	
+	websocket = new Object();
+	openWebsocket();
+	
+	var isFile = document.getElementById('isFilePlayback').checked;
+	if (isFile) {
+		playbackType = "file";
+		theAudio = document.getElementById('theAudio');
+		document.getElementById('audioSource').src = './audio/' + document.getElementById('audioFilename').value;
+		theAudio.load();
+	} else {
+		playbackType = "spotify";
+	}
+	
 	renderUpdate();
     broadcastInterval = setInterval(function(){
 		var theFrame = getFrame();
@@ -81,12 +104,17 @@ stopBroadcasting = function(){
 }
 
 function getCurrentTime(){
-	if (isPlaying){
-		var time = Date.now() - unixTimeSongStarted;
-	} else {
-		var time = timePausedAt;
+	switch (playbackType){
+		case "spotify":
+			if (isPlaying){
+				var time = Date.now() - unixTimeSongStarted;
+			} else {
+				var time = timePausedAt;
+			}
+			return time;
+		case "file":
+			return theAudio.currentTime*1000;
 	}
-	return time;
 }
 
 getHeight = function(){
@@ -119,14 +147,14 @@ broadcastRGBAFrame = function(theFrame) {
     c.set(qDat);
     c.set(b, qDat.length);
 	
-	if (workqueue.length < 3){
+	/*if (workqueue.length < 3){
 		//workqueue = [workqueue[workqueue.length-1]];
 		QueueOperation( c );		
 	} else {
 		console.log('skipped packet, queue too long');
-	}
-	//websocket.send(c);
-    
+	}*/
+	websocket.send(c);
+    console.log('websocket bufferedAmount: %i', websocket.bufferedAmount);
 }
 
 

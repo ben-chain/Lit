@@ -1,7 +1,7 @@
 //Copyright (C) 2015 <>< Charles Lohr, see LICENSE file for more info.
 //
 //This particular file may be licensed under the MIT/x11, New BSD or ColorChord Licenses.
-var wsUri = "ws://" + '192.168.0.102' + "/d/ws/issue"; //before; location.host
+var wsUri = "ws://" + '10.0.0.161' + "/d/ws/issue"; //before; location.host
 var output;
 var websocket;
 var commsup = 0;
